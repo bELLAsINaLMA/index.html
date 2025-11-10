@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SketchPro Interactivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* RESET */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* BODY */
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f0f2f5;
+  color: #222;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* HEADER PROFESIONAL */
+header {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 15px 20px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  position: relative;
+}
+
+#logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+#titleSection {
+  text-align:center;
+  flex:1;
+  margin-left: 20px;
+}
+
+#titleSection h1, #titleSection p {
+  margin:5px 0;
+  transition: color 0.3s;
+}
+
+#titleSection h1 { font-size:28px; font-weight:700; cursor:text; }
+#titleSection p { font-size:16px; color:#555; cursor:text; }
+
+#darkModeBtn {
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#222;
+  color:#fff;
+  font-weight:600;
+}
+
+/* SKETCHBOOK CON ESTILO MODERNO */
+#sketchbook {
+  width: 100%;
+  max-width: 1200px;
+  margin:20px auto;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.1);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  transition: background 0.3s;
+}
+
+/* TOOLBAR MODERNA */
+.toolbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 20px;
+  background: #fafafa;
+  border-bottom:1px solid #ddd;
+  position:relative;
+}
+
+.menuButton {
+  width:35px;
+  height:30px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+  align-items:center;
+  transition: transform 0.3s;
+}
+.menuButton div {
+  width:28px;
+  height:3px;
+  background:#222;
+  border-radius:3px;
+}
+
+/* MENU DESPLEGABLE */
+.menuPanel {
+  position:absolute;
+  top:50px;
+  left:0;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-10px);
+  transition: all 0.3s;
+  z-index:100;
+}
+
+.menuPanel.open {
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0);
+}
+
+.menuPanel select, .menuPanel button, .menuPanel input {
+  padding:8px 12px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+  cursor:pointer;
+}
+
+/* AREA DE PAGINA */
+#pageArea {
+  position:relative;
+  min-height:600px;
+  background: linear-gradient(180deg, #fdfdfd 1px, transparent 1px),
+              linear-gradient(90deg, #fdfdfd 1px, transparent 1px);
+  background-size: 25px 25px;
+  padding:20px;
+  overflow:auto;
+  transition: background 0.3s;
+}
+
+/* ELEMENTOS EDITABLES */
+.element {
+  position:absolute;
+  cursor:move;
+  border-radius:8px;
+  transition: all 0.2s;
+}
+.textElement {
+  background: rgba(250,250,250,0.9);
+  padding:8px 12px;
+  min-width:100px;
+  font-size:16px;
+  font-family:'Inter', sans-serif;
+}
+.imageElement img {
+  max-width:100%;
+  border-radius:8px;
+  display:block;
+}
+.resizeHandle {
+  position:absolute;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#fff;
+  border:2px solid rgba(0,0,0,0.2);
+  cursor:nwse-resize;
+  right:-8px;
+  bottom:-8px;
+}
+
+/* ELEMENTO SELECCIONADO */
+.element.selected {
+  outline:2px dashed #0077ff;
+}
+
+/* MODO NOCHE */
+body.night, #sketchbook.night, #pageArea.night, .textElement.night {
+  background:#222 !important;
+  color:#eee !important;
+}
+body.night { background:#111; color:#eee; }
+#sketchbook.night { background:#333; }
+#pageArea.night { background: linear-gradient(180deg, #222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px); }
+.textElement.night { background: rgba(50,50,50,0.85); color:#eee; }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  header { flex-direction:column; text-align:center; gap:10px; }
+  #titleSection h1 { font-size:22px; }
+  #titleSection p { font-size:14px; }
+  #sketchbook { max-width:95%; }
+  .menuPanel { left:50%; transform:translateX(-50%) translateY(-10px); }
+}
+
+@media(max-width:480px){
+  #titleSection h1 { font-size:18px; }
+  #titleSection p { font-size:12px; }
+  .textElement { font-size:14px; min-width:60px; }
+  .menuButton { width:30px; height:25px; }
+  .menuButton div { width:25px; height:3px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <img id="logo" src="https://via.placeholder.com/70x70.png?text=Logo" alt="Logo">
+  <div id="titleSection">
+    <h1 id="pageTitle" contenteditable="true">SketchPro</h1>
+    <p id="pageSubtitle" contenteditable="true">Subtítulo interactivo</p>
+  </div>
+  <button id="darkModeBtn">🌙</button>
+</header>
+
+<div id="sketchbook">
+  <div class="toolbar">
+    <div class="menuButton" id="menuBtn">
+      <div></div><div></div><div></div>
+    </div>
+    <div class="menuPanel" id="menuPanel">
+      <select id="pageSelect"></select>
+      <button id="addPage">+ Página</button>
+      <button id="addText">+ Texto</button>
+      <input type="file" id="imgUpload" accept="image/*">
+      <button id="deleteEl">Borrar</button>
+      <button id="saveSketchbook">Guardar</button>
+      <button id="exportPDF">Exportar PDF</button>
+    </div>
+  </div>
+  <div id="pageArea"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+(function(){
+  let pages = JSON.parse(localStorage.getItem('sketchProPages')) || [{title:'Página 1', elements:[]}];
+  let currentPage = parseInt(localStorage.getItem('sketchProCurrent')) || 0;
+  let selectedEl = null;
+  let headerData = JSON.parse(localStorage.getItem('sketchProHeader')) || {title:'SketchPro', subtitle:'Subtítulo interactivo'};
+  let nightMode = JSON.parse(localStorage.getItem('sketchProNight')) || false;
+
+  const pageArea = document.getElementById('pageArea');
+  const pageSelect = document.getElementById('pageSelect');
+  const menuBtn = document.getElementById('menuBtn');
+  const menuPanel = document.getElementById('menuPanel');
+  const pageTitleDisplay = document.getElementById('pageTitle');
+  const pageSubtitleDisplay = document.getElementById('pageSubtitle');
+  const darkModeBtn = document.getElementById('darkModeBtn');
+  const sketchbookEl = document.getElementById('sketchbook');
+
+  function uid(){return 'id'+Math.random().toString(36).substr(2,9)}
+
+  function applyMode(){
+    if(nightMode){
+      document.body.classList.add('night');
+      sketchbookEl.classList.add('night');
+      pageArea.classList.add('night');
+      document.querySelectorAll('.textElement').forEach(el=>el.classList.add('night'));
+      darkModeBtn.textContent='☀️';
+    } else {
+      document.body.classList.remove('night');
+      sketchbookEl.classList.remove('night');
+      pageArea.classList.remove('night');
+      document.querySelectorAll('.textElement').forEach(el=>el.classList.remove('night'));
+      darkModeBtn.textContent='🌙';
+    }
+  }
+
+  function saveState(){
+    pages.forEach(p=>p.elements.forEach(el=>{
+      if(el.type==='text'){
+        const domEl = document.querySelector(`.element[data-id='${el.id}']`);
+        if(domEl){ el.content = domEl.innerHTML; }
+      } else if(el.type==='image'){
+        const domEl = document.querySelector(`.element[data-id='${el.id}'] img`);
+        if(domEl) el.width = domEl.offsetWidth;
+      }
+    }));
+    localStorage.setItem('sketchProPages', JSON.stringify(pages));
+    localStorage.setItem('sketchProCurrent', currentPage);
+    localStorage.setItem('sketchProHeader', JSON.stringify(headerData));
+    localStorage.setItem('sketchProNight', JSON.stringify(nightMode));
+    alert('SketchPro guardado ✅');
+  }
+
+  function renderPagesDropdown(){
+    pageSelect.innerHTML='';
+    pages.forEach((p,i)=>{
+      const opt = document.createElement('option');
+      opt.value=i;
+      opt.text = p.title;
+      pageSelect.appendChild(opt);
+    });
+    pageSelect.value=currentPage;
+  }
+
+  function render(){
+    pageArea.innerHTML='';
+    pageTitleDisplay.textContent = headerData.title;
+    pageSubtitleDisplay.textContent = headerData.subtitle;
+
+    const p = pages[currentPage];
+    p.elements.forEach(el=>{
+      const wrapper = document.createElement('div');
+      wrapper.className='element '+(el.type==='text'?'textElement':'imageElement');
+      if(nightMode && el.type==='text') wrapper.classList.add('night');
+      wrapper.dataset.id=el.id;
+      wrapper.style.left=el.left+'px';
+      wrapper.style.top=el.top+'px';
+      wrapper.style.position='absolute';
+      wrapper.style.cursor='move';
+      if(el.type==='text'){ wrapper.contentEditable=true; wrapper.innerHTML=el.content; }
+      else if(el.type==='image'){
+        const img=document.createElement('img');
+        img.src=el.src; img.style.width=(el.width||240)+'px'; wrapper.appendChild(img);
+        const handle=document.createElement('div'); handle.className='resizeHandle'; wrapper.appendChild(handle);
+        attachImageResize(wrapper,img,handle,el);
+      }
+      attachDrag(wrapper,el);
+      wrapper.addEventListener('click',e=>{ e.stopPropagation(); selectElement(wrapper); });
+      pageArea.appendChild(wrapper);
+    });
+  }
+
+  function attachDrag(wrapper,el){
+    let dragging=false,ox=0,oy=0;
+    wrapper.addEventListener('pointerdown',e=>{ dragging=true; ox=e.clientX-wrapper.getBoundingClientRect().left; oy=e.clientY-wrapper.getBoundingClientRect().top; });
+    window.addEventListener('pointermove',e=>{ if(!dragging) return; const rect=wrapper.parentElement.getBoundingClientRect(); wrapper.style.left=(e.clientX-rect.left-ox)+'px'; wrapper.style.top=(e.clientY-rect.top-oy)+'px'; });
+    window.addEventListener('pointerup',()=>{ if(dragging){ dragging=false; el.left=parseInt(wrapper.style.left); el.top=parseInt(wrapper.style.top); }});
+  }
+
+  function attachImageResize(wrapper,img,handle,el){
+    let resizing=false,startW=0,startX=0;
+    handle.addEventListener('pointerdown',e=>{ resizing=true; startW=img.offsetWidth; startX=e.clientX; });
+    window.addEventListener('pointermove',e=>{ if(!resizing) return; img.style.width=Math.max(40,startW+(e.clientX-startX))+'px'; });
+    window.addEventListener('pointerup',()=>{ if(resizing){ resizing=false; el.width=img.offsetWidth; }});
+  }
+
+  function selectElement(el){
+    if(selectedEl) selectedEl.classList.remove('selected');
+    selectedEl=el;
+    el.classList.add('selected');
+  }
+
+  document.body.addEventListener('click',()=>{ if(selectedEl){ selectedEl.classList.remove('selected'); selectedEl=null; }});
+  menuBtn.addEventListener('click',e=>{ e.stopPropagation(); menuPanel.classList.toggle('open'); });
+  document.body.addEventListener('click',()=>{ menuPanel.classList.remove('open'); });
+
+  document.getElementById('addText').addEventListener('click',()=>{ pages[currentPage].elements.push({id:uid(),type:'text',left:20,top:20,content:'<p>Texto</p>'}); render(); });
+  document.getElementById('imgUpload').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const reader=new FileReader(); reader.onload=()=>{ pages[currentPage].elements.push({id:uid(),type:'image',left:20,top:20,src:reader.result,width:240}); render(); }; reader.readAsDataURL(f); });
+  document.getElementById('deleteEl').addEventListener('click',()=>{ if(selectedEl){ const id=selectedEl.dataset.id; pages[currentPage].elements=pages[currentPage].elements.filter(el=>el.id!==id); selectedEl=null; render(); }});
+  document.getElementById('saveSketchbook').addEventListener('click',saveState);
+  document.getElementById('exportPDF').addEventListener('click',()=>{ html2pdf().set({margin:0.2, filename:'pagina.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in', format:'a4', orientation:'portrait'}}).from(pageArea).save(); });
+  document.getElementById('addPage').addEventListener('click',()=>{ const newTitle='Página '+(pages.length+1); pages.push({title:newTitle,elements:[]}); currentPage=pages.length-1; renderPagesDropdown(); render(); });
+  pageSelect.addEventListener('change',()=>{ currentPage=parseInt(pageSelect.value); render(); });
+
+  pageTitleDisplay.addEventListener('input',()=>{ headerData.title=pageTitleDisplay.textContent; localStorage.setItem('sketchProHeader',JSON.stringify(headerData)); });
+  pageSubtitleDisplay.addEventListener('input',()=>{ headerData.subtitle=pageSubtitleDisplay.textContent; localStorage.setItem('sketchProHeader',JSON.stringify(headerData)); });
+
+  darkModeBtn.addEventListener('click',()=>{ nightMode=!nightMode; localStorage.setItem('sketchProNight',JSON.stringify(nightMode)); applyMode(); });
+
+  applyMode();
+  pageTitleDisplay.textContent=headerData.title;
+  pageSubtitleDisplay.textContent=headerData.subtitle;
+  renderPagesDropdown(); render();
+})();
+</script>
+</body>
+</html>
